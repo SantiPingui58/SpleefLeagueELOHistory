@@ -8,6 +8,15 @@ public class Data {
   }
   return null;
 }
+
+public boolean doesThisPlayerExist(String name) {
+for (Player p : players) {
+  if (p.getName().equalsIgnoreCase(name)) {
+  return true;
+}
+}
+return false;
+}
   public String checkCountry(String name) {
     Table table;
       table = loadTable("/data/player_countries.csv");
@@ -139,6 +148,8 @@ topAt1 = gfg.sortByValue(topAt1);
 topAt15 = gfg.sortByValue(topAt15);
 topWL = gfg.sortByValueDouble(topWL);
 }
+
+
 public void cups(Player p) {
               List<Cup> list = new ArrayList<Cup>();
             for (Cup c : cups) {
@@ -172,7 +183,7 @@ public void cups(Player p) {
   }
   
   public void playMatches() {
-   if (ms==5) {
+   if (ms==200) {
     ms =0;
   if (it+1 <= tournaments.size()) {
     Tournament t = tournaments.get(it);
@@ -187,11 +198,12 @@ public void cups(Player p) {
       for (int y =0; y < table.getRowCount() ;y++) {
         if (table.getInt(y,5)==ir) {
           roundname = table.getString(y,4);
-        String ganador = table.getString(y,0);
+          String ganador = table.getString(y,0);
         String perdedor = table.getString(y,3);               
       Player p1 = getPlayer(ganador);
-      Player p2 = getPlayer(perdedor);      
-     if (p1.getInRowLives() < 3) {
+      Player p2 = getPlayer(perdedor);   
+      int newELO = 0;
+       if (p1.getInRowLives() < 3) {
               p1.resetInRowLives();
               p1.beActive();
             }            
@@ -199,14 +211,31 @@ public void cups(Player p) {
               p2.resetInRowLives();
               p2.beActive();
             } 
+          if (table.getInt(y,1) != table.getInt(y,2)) {          
         p1.addWin();
         p2.addLose();      
-        int newELO = calculateELO(p1,p2);     
-        p1.setFutureELO(p1.getELO()+newELO);
+         newELO = calculateELO(p1,p2,false);      
+          } else {
+            if (p1.getELO()>p2.getELO()) {
+                 newELO = calculateELO(p1,p2,true);   
+            } else if (p2.getELO()>p1.getELO()) {
+               newELO = calculateELO(p2,p1,true);   
+            } 
+            p2.addDraw();
+            p1.addDraw();
+          }
+          
+           p1.setFutureELO(p1.getELO()+newELO);
         p2.setFutureELO(p2.getELO()-newELO);
-       if (boxking==null ||boxking.getName().equalsIgnoreCase(p2.getName())) {
+          
+          if (boxking==null ||boxking.getName().equalsIgnoreCase(p2.getName())) {
        boxking= p1;
      }      
+     
+     if (!boxking.isActive()) {
+       boxking = p1;
+     }
+       
       }
       }    
         if (ir==1) {

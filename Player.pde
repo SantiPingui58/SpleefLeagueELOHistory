@@ -1,6 +1,7 @@
 public class Player {
 
     int wins;
+    int draws;
     int loses;
     int torneosganados;
     int inrowlives;
@@ -56,6 +57,14 @@ public class Player {
 
     
   }
+  
+  int getDraws() {
+  return this.draws;
+}
+
+void addDraw() {
+this.draws = this.draws+1;
+}
     PImage getBodySkin() {
     return body;
   }
