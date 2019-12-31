@@ -198,42 +198,82 @@ public void cups(Player p) {
       for (int y =0; y < table.getRowCount() ;y++) {
         if (table.getInt(y,5)==ir) {
           roundname = table.getString(y,4);
+  List<Player> ganadores = new ArrayList<Player>();
+   List<Player> perdedores = new ArrayList<Player>();
+              
           String ganador = table.getString(y,0);
-        String perdedor = table.getString(y,3);               
+        String perdedor = table.getString(y,3);  
+        if (t.getSize()==1) {
       Player p1 = getPlayer(ganador);
       Player p2 = getPlayer(perdedor);   
+      ganadores = Arrays.asList(p1);
+      perdedores = Arrays.asList(p2);
+        } else if (t.getSize()==2) {
+           Player ganador1 = getPlayer(ganador.split("-")[0]);
+          Player ganador2 = getPlayer(ganador.substring(ganador.indexOf("-")+1));        
+           Player perdedor1 = getPlayer(perdedor.split("-")[0]);
+           Player perdedor2 = getPlayer(perdedor.substring(perdedor.indexOf("-")+1));
+           ganadores = Arrays.asList(ganador1,ganador2);
+           perdedores = Arrays.asList(perdedor1,perdedor2);
+        }
+      
       int newELO = 0;
-       if (p1.getInRowLives() < 3) {
-              p1.resetInRowLives();
-              p1.beActive();
-            }            
-    if (p2.getInRowLives() < 3) {
-              p2.resetInRowLives();
-              p2.beActive();
-            } 
-          if (table.getInt(y,1) != table.getInt(y,2)) {          
-        p1.addWin();
-        p2.addLose();      
+      List<Player> total = ganadores;
+      total.addAll(perdedores);
+      for (Player p : total) {
+        if (p.getInRowLives() < 3) {
+              p.resetInRowLives();
+              p.beActive();
+            }   
+      }
+       int p1 = 0;
+        int p2 = 0;
+        for (Player p : ganadores) {
+          p1 = p1+p.getELO();
+        }
+        for (Player p : perdedores) {
+          p2 = p2+p.getELO();
+        }
+        p1 = p1 / ganadores.size();
+        p2 = p2 / perdedores.size();
+        
+          if (table.getInt(y,1) != table.getInt(y,2)) { 
+            for (Player p : ganadores) {
+              p.addWin();
+            }
+            for (Player p : perdedores) {
+              p.addLose();
+            }
+
          newELO = calculateELO(p1,p2,false);      
           } else {
-            if (p1.getELO()>p2.getELO()) {
+            if (p1>p2) {
                  newELO = calculateELO(p1,p2,true);   
-            } else if (p2.getELO()>p1.getELO()) {
+            } else if (p2>p1) {
                newELO = calculateELO(p2,p1,true);   
             } 
-            p2.addDraw();
-            p1.addDraw();
+            for (Player p : total) {
+            p.addDraw();
           }
-          
-           p1.setFutureELO(p1.getELO()+newELO);
-        p2.setFutureELO(p2.getELO()-newELO);
-          
-          if (boxking==null ||boxking.getName().equalsIgnoreCase(p2.getName())) {
-       boxking= p1;
+          }
+            for (Player p : ganadores) {
+            p.setFutureELO(p.getELO()+newELO);
+          }
+          for (Player p : perdedores) {
+            p.setFutureELO(p.getELO()-newELO);
+          }
+      
+      List<String> perdedoresname = new ArrayList<String>();
+      for (Player p : perdedores) {
+      perdedoresname.add(p.getName());
+    }
+      
+          if (boxking==null ||perdedoresname.contains(boxking.getName())) {
+       boxking= ganadores.get(0);
      }      
      
      if (!boxking.isActive()) {
-       boxking = p1;
+       boxking = ganadores.get(0);
      }
        
       }

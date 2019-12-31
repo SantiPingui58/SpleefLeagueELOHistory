@@ -9,7 +9,8 @@ public class Tournament {
   Table table;
   int maxrounds;
   
-  Tournament(String ganador, String segundo, String tercero, String cuarto, String name, Table table, int maxrounds,String displayname) {
+  int size;
+  Tournament(String ganador, String segundo, String tercero, String cuarto, String name, Table table, int maxrounds,String displayname, int size) {
     this.ganador = ganador;
     this.segundo = segundo;
     this.tercero = tercero;
@@ -18,8 +19,13 @@ public class Tournament {
     this.table = table;
     this.maxrounds = maxrounds;
     this.displayname = displayname;
+    this.size = size;
   }
   
+  
+  public int getSize() {
+  return this.size;
+}
   String getDisplayName() {
   return this.displayname;
 }

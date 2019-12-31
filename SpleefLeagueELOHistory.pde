@@ -41,7 +41,8 @@ PImage unknown;
 PImage bg;
 void setup() {
   bg = loadImage("fondo.png");
-  size(1920, 1080);
+  //size(1920, 1080);
+  size(1366,768);
   stroke(255);
   frameRate(200);
   loadData();
@@ -54,8 +55,6 @@ void loadData() {
   String[] countries_txt = loadStrings("/data/countries.txt");
   PImage img;
   for (String s : countries_txt) {
-
-
     img = loadImage("/data/countries/"+s+".png");
     countries.put(s, img);
   }
@@ -73,45 +72,60 @@ void loadData() {
     String cuarto = table.getString(0, 9);
     int maxrounds = table.getInt(0, 10);
     String displayname = table.getString(1, 6);
-    Tournament t = new Tournament(ganador, segundo, tercero, cuarto, s, table, maxrounds, displayname);
+    int size = table.getInt(2,6);
+    if (size==0) {
+    size = 1;
+  }
+    Tournament t = new Tournament(ganador, segundo, tercero, cuarto, s, table, maxrounds, displayname,size);
     tournaments.add(t);
   }
 
 
 
   for (Tournament t : tournaments) {
+
     Table ta = t.getTable();
+     Data data = new Data();
+     List<String> list = null;
     for (int i = 0; i < ta.getRowCount(); i++) {
       String ganador = ta.getString(i, 0);
-      String perdedor = ta.getString(i, 3);
-      Data data = new Data();
-      String country1 = data.checkCountry(ganador);
-      String country2 = data.checkCountry(perdedor);
-
-      if (!data.doesThisPlayerExist(ganador)) {
-        Player p1 = new Player(ganador, country1);
-        players.add(p1);
-      }
-      if (!data.doesThisPlayerExist(perdedor)) {
-        Player p2 = new Player(perdedor, country2);
-        players.add(p2);
+      String perdedor = ta.getString(i, 3);   
+      if (t.getSize()==2) {
+      String ganador1 = ganador.split("-")[0];
+          String ganador2 = ganador.substring(ganador.indexOf("-")+1);        
+           String perdedor1 = perdedor.split("-")[0];
+           String perdedor2 = perdedor.substring(perdedor.indexOf("-")+1);
+         list = Arrays.asList(ganador1,ganador2,perdedor1,perdedor2);
+       } else {
+      list = Arrays.asList(ganador,perdedor);
+       }
+       
+      for (String s : list) {
+      if (!data.doesThisPlayerExist(s)) {
+        String country = data.checkCountry(s);
+        Player p = new Player(s,country);
+        players.add(p);
       }
     }
+
+          
+    }
+    
   }
 
 
   unknown = loadImage("/data/countries/Unknown.png");
 }
 
-int calculateELO(Player winner, Player loser, boolean draw) {
+int calculateELO(int elo1, int elo2, boolean draw) {
    int k = 48;
   if (draw) {
     k = 16;
   } 
-  double p1 = ((double) winner.getELO()/ (double) 400); //2
+  double p1 = ((double) elo1/ (double) 400); //2
   double p1_ = Math.pow(10, p1); //100
 
-  double p2 = ((double)loser.getELO()/(double)400); 
+  double p2 = ((double)elo2/(double)400); 
   double p2_ = Math.pow(10, p2);
 
   double d = p1_ + p2_;
@@ -123,9 +137,9 @@ int calculateELO(Player winner, Player loser, boolean draw) {
 
 
 void draw() {
-
-  doBackground();
+  
   if (state==0) {
+      doBackground();
     for (Player p : players) {
       if (!p.isActive()) {
         p.setFutureY(1500);
@@ -279,7 +293,7 @@ void draw() {
 
 public void doBackground() {
 
-  background(bg);
+  background(0);
   if (state!=2) {
     zigBlack = createFont("Ziggurat-Black", 20);
     textFont(zigBlack);
